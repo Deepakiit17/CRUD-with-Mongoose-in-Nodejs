@@ -1,102 +1,36 @@
-const mongoose = require('mongoose');
+const express = require('express');
+require("./config");
+const Product = require('./product');
+const app = express();
 
-mongoose.connect('mongodb://localhost:27017/e-comm');
-const productSchema = new mongoose.Schema({
-    name: String,
-    price: Number,
-    brand: String,
-    category: String
-
-});
-
-const saveInDB = async () => {
-    const Product = mongoose.model('products', productSchema);
-    let data = new Product({
-        name: "max 100",
-        price: 200,
-        brand: 'maxx',
-        category: 'Mobile'
-    });
+app.use(express.json());
+app.post("/create", async (req, resp) => {
+    let data = new Product(req.body);
     const result = await data.save();
     console.log(result);
-}
+    resp.send(result);
+});
 
-const updateInDB =async  () => {
-    const Product = mongoose.model('products', productSchema);
-    let data =await  Product.updateOne(
-        { name: "max 6" },
+app.get("/list", async (req, resp) => {
+    let data = await Product.find();
+    resp.send(data);
+})
+
+app.delete("/delete/:_id", async (req, resp) => {
+    console.log(req.params);
+    let data = await Product.deleteOne(req.params);
+    resp.send(data);
+})
+
+app.put("/update/:_id", async (req, resp) => {
+    console.log(req.params);
+    let data = await Product.updateOne(
+        req.params,
         {
-            $set: { price: 550,name:'max pro 6' }
+            $set: req.body
         }
-    )
-    console.log(data)
-}
+    );
+    resp.send(data);
+})
 
-const deleteInDB = async ()=>{
-    const Product = mongoose.model('products', productSchema);
-    let data = await Product.deleteOne({name:'max 100'})
-    console.log(data);
-}
-const findInDB = async ()=>{
-    const Product = mongoose.model('products', productSchema);
-    let data = await Product.find({name:'max pro 611'})
-    console.log(data);
-}
-
-findInDB();
-
-
-
-
-// const express = require('express');
-// const path = require('path');
-
-// const app = express();
-// const publicPath = path.join(__dirname, 'public');
-
-// // app.use(express.static(publicPath));
-
-// app.set('view engine', 'ejs');
-
-// app.get('', (_, resp) => {
-//     resp.sendFile(`${publicPath}/index.html`)
-// })
-
-// app.get('/profile', (_, resp) => {
-//     const user = {
-//         name: 'deepak meena',
-//         email: 'deepak@test.com',
-//         city: 'jaipur'
-//     }
-//     resp.render('profile', {user});
-// })
-
-// app.get('/aboutme', (_, resp) => {
-//     resp.sendFile(`${publicPath}/about.html`)
-// })
-// app.get('/help', (_, resp) => {
-//     resp.sendFile(`${publicPath}/help.html`)
-// })
-// app.get('*', (_, resp) => {
-//     resp.sendFile(`${publicPath}/nopage.html`)
-// })
-
-// app.listen(5000);
-
-// const express = require('express');
-// const app = express();
-
-// app.get('', (req, res) => {
-//     console.log("data sent by browser =>> ", req.query.name)
-//     res.send('Hello,' + req.query.name);
-// });
-
-// app.get('/about', (req, res) => {
-//     res.send('Hello, this is About page');
-// });
-
-// app.get('/help', (req, res) => {
-//     res.send('Hello, this is Help page');
-// });
-
-// app.listen(5000);
+app.listen(5000);
